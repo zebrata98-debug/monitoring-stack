@@ -1,144 +1,107 @@
-# 📊 Monitoring Stack
+# monitoring-stack
 
-A production-style observability stack built with **Prometheus**, **Grafana**, and **Node Exporter**, deployed via Docker Compose. Monitors host-level system metrics (CPU, memory, disk, network) with real alerting rules and a full Grafana dashboard.
-
----
-
-## 🏗️ Architecture
-
-```
-┌─────────────────────────────────────────────────────┐
-│                    Docker Network                    │
-│                                                      │
-│   ┌───────────────┐     scrapes      ┌────────────┐ │
-│   │  Prometheus   │ ───────────────► │   Node     │ │
-│   │   :9090       │                  │  Exporter  │ │
-│   └───────┬───────┘                  │   :9100    │ │
-│           │                          └────────────┘ │
-│           │ data source                             │
-│           ▼                                         │
-│   ┌───────────────┐                                 │
-│   │    Grafana    │                                 │
-│   │    :3000      │                                 │
-│   └───────────────┘                                 │
-└─────────────────────────────────────────────────────┘
-```
-
-- **Prometheus** — scrapes and stores time-series metrics every 15 seconds
-- **Node Exporter** — exposes host-level hardware and OS metrics
-- **Grafana** — visualises metrics with dashboards and supports alerting
+A local observability stack using Prometheus, Grafana and Node Exporter running in Docker. Built this to learn how monitoring works in practice and to have something real to show alongside my NOC background.
 
 ---
 
-## 📁 Project Structure
+## What it does
+
+- **Prometheus** collects metrics from the host every 15 seconds
+- **Node Exporter** exposes the actual system metrics (CPU, RAM, disk, network)
+- **Grafana** lets you visualise everything in dashboards and set up alerts
+
+All three run in Docker containers on the same network so they can talk to each other without any extra configuration.
+
+---
+
+## Project layout
 
 ```
 monitoring-stack/
-├── docker-compose.yml        # Defines all three services and shared network
+├── docker-compose.yml
 ├── prometheus/
-│   ├── prometheus.yml        # Scrape config and alertmanager settings
-│   └── alert.rules.yml       # Alerting rules for CPU, memory, and disk
+│   ├── prometheus.yml       # scrape config
+│   └── alert.rules.yml      # alert rules
 └── README.md
 ```
 
 ---
 
-## ⚙️ Prerequisites
+## Requirements
 
-- [Docker](https://docs.docker.com/get-docker/) installed
-- [Docker Compose](https://docs.docker.com/compose/install/) installed
-- Ports `9090`, `9100`, and `3000` available on your host
+- Docker
+- Docker Compose
+- Ports 9090, 9100 and 3000 free on your machine
 
 ---
 
-## 🚀 Getting Started
+## How to run it
 
-**1. Clone the repository**
+Clone the repo and start everything:
 
 ```bash
 git clone https://github.com/zebrata98-debug/monitoring-stack.git
 cd monitoring-stack
-```
-
-**2. Start the stack**
-
-```bash
 docker compose up -d
 ```
 
-**3. Verify all containers are running**
+Check that all three containers are up:
 
 ```bash
 docker compose ps
 ```
 
-You should see `running` status for `prometheus`, `grafana`, and `node-exporter`.
+Then open these in your browser:
 
-**4. Access the services**
+| Service | URL |
+|---------|-----|
+| Prometheus | http://localhost:9090 |
+| Node Exporter metrics | http://localhost:9100/metrics |
+| Grafana | http://localhost:3000 |
 
-| Service | URL | Credentials |
-|---------|-----|-------------|
-| Prometheus | http://localhost:9090 | — |
-| Node Exporter | http://localhost:9100/metrics | — |
-| Grafana | http://localhost:3000 | admin / admin123 |
-
----
-
-## 📈 Setting Up the Grafana Dashboard
-
-1. Log into Grafana at `http://localhost:3000`
-2. Go to **Connections → Data sources → Add data source → Prometheus**
-3. Set the URL to `http://prometheus:9090`
-4. Click **Save & Test**
-5. Go to **Dashboards → Import**
-6. Enter dashboard ID `1860` (Node Exporter Full)
-7. Select your Prometheus data source and click **Import**
+Grafana login is `admin` / `admin123` — change this if you're running it anywhere other than locally.
 
 ---
 
-## 🚨 Alert Rules
+## Setting up Grafana
 
-Three alerting rules are configured in `prometheus/alert.rules.yml`:
+1. Go to Connections → Data sources → Add data source → Prometheus
+2. Set the URL to `http://prometheus:9090` (use the service name, not localhost)
+3. Save & Test — should say data source is working
+4. Go to Dashboards → Import → enter ID `1860` → select your data source → Import
 
-| Alert | Condition | Severity | Duration |
-|-------|-----------|----------|----------|
-| HighCPUUsage | CPU usage > 80% | Warning | 2 minutes |
-| HighMemoryUsage | Memory usage > 85% | Warning | 2 minutes |
-| LowDiskSpace | Disk free < 15% | Critical | 5 minutes |
-
-View active alerts at: `http://localhost:9090/alerts`
+That gives you the Node Exporter Full dashboard with CPU, memory, disk and network all in one place.
 
 ---
 
-## 🛠️ Useful Commands
+## Alert rules
+
+I set up three basic alerts in `prometheus/alert.rules.yml`:
+
+- CPU above 80% for 2 minutes → warning
+- Memory above 85% for 2 minutes → warning
+- Disk space below 15% for 5 minutes → critical
+
+You can check them at `http://localhost:9090/alerts`
+
+---
+
+## Handy commands
 
 ```bash
-# Start the stack in the background
-docker compose up -d
-
-# Stop the stack
+# stop everything
 docker compose down
 
-# View logs for a specific service
+# check logs
 docker compose logs prometheus
 docker compose logs grafana
 
-# Reload Prometheus config without restarting
+# reload prometheus config without restarting
 curl -X POST http://localhost:9090/-/reload
 ```
 
 ---
 
-## 📌 Notes
+## Notes
 
-- Metric data is persisted in Docker named volumes (`prometheus_data`, `grafana_data`) and survives container restarts
-- Prometheus retains 15 days of metrics by default (configurable in `docker-compose.yml`)
-- Change the default Grafana password before deploying in any non-local environment
-
----
-
-## 🧰 Tech Stack
-
-![Prometheus](https://img.shields.io/badge/Prometheus-E6522C?style=flat&logo=prometheus&logoColor=white)
-![Grafana](https://img.shields.io/badge/Grafana-F46800?style=flat&logo=grafana&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)
+Data is stored in Docker named volumes so it survives restarts. Prometheus keeps 15 days of metrics by default, that can be changed in the compose file.
