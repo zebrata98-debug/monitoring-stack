@@ -1,16 +1,9 @@
 # monitoring-stack
 
-A local observability stack using Prometheus, Grafana and Node Exporter running in Docker. Built this to learn how monitoring works in practice and to have something real to show alongside my NOC background.
+A local observability stack using Prometheus, Grafana and Node Exporter running in Docker. Built this to learn how monitoring works in practice.
 
 ---
 
-## What it does
-
-- **Prometheus** collects metrics from the host every 15 seconds
-- **Node Exporter** exposes the actual system metrics (CPU, RAM, disk, network)
-- **Grafana** lets you visualise everything in dashboards and set up alerts
-
-All three run in Docker containers on the same network so they can talk to each other without any extra configuration.
 
 ---
 
