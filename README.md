@@ -5,8 +5,11 @@ Prometheus + Grafana + Node Exporter running
 ## Run
 
 git clone https://github.com/zebrata98-debug/monitoring-stack.git
+
 cd monitoring-stack
+
 docker compose up -d
+
 docker compose ps
 
 Set-up Grafana 
@@ -24,6 +27,9 @@ Dashboards → Import → ID 1860 → Import
 ## Commands
 
 docker compose down
+
 docker compose logs prometheus
+
 docker compose logs grafana
+
 curl -X POST http://localhost:9090/-/reload
