@@ -1,10 +1,8 @@
-# monitoring-stack
+monitoring-stack
 
 Prometheus + Grafana + Node Exporter running
 
-## Run
-
-git clone https://github.com/zebrata98-debug/monitoring-stack.git
+Run
 
 cd monitoring-stack
 
